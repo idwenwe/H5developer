@@ -74,7 +74,7 @@ var exp = (function(e){
     //表明当前的运行的实在手机上还是PC上面。
     baseinfo.userAgent = (function(){
     
-        if(/Android|iPhone|iPad/.test(obj.Brower)){
+        if(/Android|iPhone|iPad/.test(baseinfo.Brower)){
             return 'Moblie';
         }
         else {
@@ -177,7 +177,7 @@ var exp = (function(e){
         
         var attrName, attrDate, ex = false, i, eles = [];
         
-        if(!(ele instanceof Element) || !(ele instanceof Array)){
+        if(!(ele instanceof Element) && !(ele instanceof Array)){
             console.error("TypeError: Type of arguments was wrong");
             return ;
         } 
@@ -207,10 +207,6 @@ var exp = (function(e){
                 if(typeof arguments[3] === 'boolean'){
                     ex = arguments[3];   
                 }
-                else {
-                    console.error("TypeError: Type of arguments was wrong");
-                    return ;   
-                }
             }
             else if(typeof arguments[2] === 'boolean'){
                 ex = arguments[2];   
@@ -225,7 +221,7 @@ var exp = (function(e){
         }
         for(i = 0; i < eles.length; i++){
             if(ex){
-                if(attrName === 'style'){
+                if(attrName === 'style' || attrName === 'class'){
                     eles[i].setAttribute(attrName, eles[i].getAttribute(attrName) + ';' +attrDate);   
                 }
                 else{
@@ -238,6 +234,40 @@ var exp = (function(e){
         }    
         return ele;
     };
+    
+/********************************************************
+**summary:添加，修改，或是删除相关元素的某一属性的值。
+**
+**parameter：
+**  1.ele：元素可谓单一元素或者是元素数组。
+**  2.con：style中存在的某一中属性的名称。
+**
+**return:返回ele值
+*********************************************************/
+    dom.deleteStyle = function(ele, con){
+        
+        var content, check, eles = [], i;
+        
+        check = new RegExp(con + '\:.+\;');
+        
+        if(ele instanceof Array){
+            eles = ele;
+        }
+        else {
+            eles.push(ele);  
+        }
+        
+        for(i = 0 ; i < eles.length; i++){
+            
+            content = '' + eles[i].getAttribute('style');
+            if(check.test(content)){
+                content.replace(check, '');
+                eles[i].setAttribute('style', content);
+            }
+        }
+        
+        return ele;
+    }
 
 /********************************************************
 **summary:创建新元素内容并返回相关的内容。
@@ -253,7 +283,7 @@ var exp = (function(e){
         
         var doc, attrs, newEle;
         
-        if(attr instanceof object){
+        if(!(attr instanceof Object)){
             console.error("TypeError: Type of arguments was wrong");
             return ;       
         }
@@ -297,7 +327,7 @@ var exp = (function(e){
         
         var originDoc, newDoc, deepCopy = false, newEle, each, i, eles = [];
         
-        if(!(ele instanceof Element) || !(ele instanceof Array)){
+        if(!(ele instanceof Element) && !(ele instanceof Array)){
             console.error("TypeError: Type of arguments was wrong");
             return ;
         }  
@@ -345,7 +375,7 @@ var exp = (function(e){
     dom.deleteElements = function(ele, extra){
         var notDeleteChild = false, doc, eles = [], i, j, child;
         
-        if(!(ele instanceof Element) || !(ele instanceof Array)){
+        if(!(ele instanceof Element) && !(ele instanceof Array)){
             console.error("TypeError: Type of arguments was wrong");
             return ;
         } 
@@ -400,7 +430,7 @@ var exp = (function(e){
         
         var existDoc, eleDoc,eles=[], i ;
         
-        if(!(ele instanceof Element) || !(existEle instanceof Element)){
+        if(!(ele instanceof Element) && !(existEle instanceof Element)){
             console.error("TypeError: Type of arguments was wrong");
             return ;
         }
@@ -409,10 +439,10 @@ var exp = (function(e){
             eles = ele;   
         }
         else {
-            eles.push = ele;   
+            eles.push(ele);   
         }
         
-        existDoc = existDoc.ownerDocument;
+        existDoc = existEle.ownerDocument;
         if(type === dom._AFTER){
             for(i = 0 ; i < eles.length; i++){
                 existDoc.insertAfter(eles[i], existEle);
@@ -445,7 +475,7 @@ var exp = (function(e){
 **return:空。
 *********************************************************/ 
     dom.replaceElements = function(rep, content){
-           
+        //to do:替换HTML页面中的某一个字段的内容。
     };
 
 /********************************************************
@@ -459,7 +489,7 @@ var exp = (function(e){
 **return：查找到的元素的节点对象数组。
 *********************************************************/
     dom.queryElements = function(find, extra){
-           
+        //to do:遍历当前的内容中的所有的元素进行相关的操作。通过船只来进行标签查找。
     };
     
     e.dom = dom;
@@ -487,7 +517,7 @@ var exp = (function(e){
         
         for(i = 0; i < corresponding.length; i++){
             for(j = 0; j < corresponding[i].length; j++){
-                if(RegExp(''+type).test(corresponding[i][j])){
+                if((new RegExp(''+type)).test(corresponding[i][j])){
                     return corresponding[i];   
                 }
             }
@@ -510,11 +540,6 @@ var exp = (function(e){
     events.addEvents = function(ele, type, callback, setting){
         
         var eles=[], munkup=false, finalType, i;
-        
-        if(!(ele instanceof Element) || !(ele instanceof Array)){
-            console.error("TypeError: Type of arguments was wrong");
-            return ;
-        }
         
         if(ele instanceof Array){
             eles = ele;   
@@ -549,7 +574,7 @@ var exp = (function(e){
                 eles[i].addEventListener('on'+finalType, callback);   
             }
             else {
-                eles[i]['on'+finalType] = callback;   
+                eles[i]['on'+finalType] = callback(e);   
             }
         }
     };
@@ -570,7 +595,7 @@ var exp = (function(e){
         var Str = corresponding.toString().split(',');
         
         for(i = 0; i < Str.length;i++){
-            if(RegExp(''+PCType).test(Str[i])){
+            if((new RegExp(''+PCType)).test(Str[i])){
                 break;   
             }
         }
@@ -670,33 +695,26 @@ var exp = (function(e){
 **
 **return:空。
 *********************************************************/  
-    var validateImage = function(img, callback){
-        if(!img.complete){
-            if(!callback){
-                console.errror("Couldn`t preload image");
-                return ;   
-            }
+    var validateImage = function(img){
+        var check = arguments[1];
+        
+        if(check){
+            imageCheck++;
+            return;
+        }
+        if(!img.complete){   
             setTimeout(function(){
-                exp.preload.preloadImages(img.src, false);
+                exp.preload.preloadImages(img.src, true);
             }, 200);
         }
         else if(typeof img.naturalWidth != "undefined" && img.naturalWidth == 0){
-            if(!callback){
-                console.errror("Couldn`t preload image");
-                return ;   
-            }
             setTimeout(function(){
-                exp.preload.preloadImages(img.src, false);
+                exp.preload.preloadImages(img.src, true);
             }, 200);  
         }
         else{
-            if(callback){
-                callback(); 
-            }
-            else {
-                console.log('Preloading pic successed'); 
-                return;
-            }
+            imageCheck++
+            return;
         }
     };
 
@@ -711,33 +729,40 @@ var exp = (function(e){
 **
 **return:空。
 *********************************************************/  
-    pre.preloadImages = function(src, callback){
+    pre.preloadImages = function(src){
         
-        var cb = true, error = validateImage;
-        
-        cb = function(){
-            return;   
-        }
-        
-        if(arguments[1] instanceof Function){
-            cb = callback;   
-        }
-        else if(cb === false){
-            cb = false;   
-        }
-        if(arguments[2] instanceof Function){
-            error = err;   
-        }
+        var check = arguments[1];
         
         var img = new Image();
-        
-        else if(cb){
-            cb = null;
+        if(check){
+            img.onload = function(){validateImage(img, true)};
+            img.onerror = function(){validateImage(img, true)};
         }
-        img.onload = validateImage(img, cb);
-        img.onerror = validateImage(img, error);
+        else {
+            img.onload = function(){validateImage(img)};
+            img.onerror = function(){validateImage(img)};
+        }
         img.src = src;
     };
+    
+/********************************************************
+**summary:音频内容预加载反馈
+**
+**return:空。
+*********************************************************/
+    var validateMusic = function(ele){
+        
+        var check = arguments[1];
+        
+        if(!check){
+            console.error('AudioError: Cannot loading this audio');
+        }
+        else {
+            audioCheck++;
+            return;
+        }
+        
+    }
     
 /********************************************************
 **summary:音频内容预加载
@@ -750,9 +775,32 @@ var exp = (function(e){
 **
 **return:空。
 *********************************************************/  
-    pre.preloadAudio = function(src, callback, err){
+    pre.preloadAudio = function(src){
         
+        var aud = new Audio(src);
+        aud.onloadedmetadata = function(){validateMusic(aud, true)};
+        aud.onerror = function(){validateMusic(aud)};
+        aud.src = src;
     };
+    
+/********************************************************
+**summary:视频内容预加载情况判断
+**
+**return:空。
+*********************************************************/
+    var vaildateVideo = function(ele){
+        
+        var check = arguments[1];
+        
+        if(!check){
+            console.error('AudioError: Cannot loading this audio');
+        }
+        else {
+            audioCheck++;
+            return;
+        }
+        
+    }
     
 /********************************************************
 **summary:视频内容预加载
@@ -765,34 +813,12 @@ var exp = (function(e){
 **
 **return:空。
 *********************************************************/  
-    pre.preloadVideo = function(src, callback, err){
-           
-    };
-
-/********************************************************
-**summary:内容加载。
-**
-**parameter:
-**  1.type：加载类型。（加载函数。）
-**  2.src：文件路径。
-**
-**return:空。
-*********************************************************/ 
-    var load = function(src, type){
+    pre.preloadVideo = function(src){
         
-    };
-    
-/********************************************************
-**summary:预加载完成判断。此方法将不可以在外部进行调用。
-**
-**parameter:
-**  1.type：加载类型。（加载函数。）
-**  2.src：加载路径。
-**
-**return:空。
-*********************************************************/  
-    var reload = function(src, type){
-        
+        var vid = new Video();
+        vid.onloadedmetadata = function(){vaildateVideo(vid, true)};
+        vid.onerror = function(){vaildateVideo(vid)};
+        vid.src = src;
     };
     
 /********************************************************
@@ -813,9 +839,94 @@ var exp = (function(e){
 **parameter:无
 **
 **return:空。
-*********************************************************/  
+*********************************************************/
+    
+    var imageCount = 0;
+    var audioCount = 0;
+    var videoCount = 0;
+    var imageCheck = 0;
+    var audioCheck = 0;
+    var videoCheck = 0;
+    
+    
     pre.preload = function(){
-           
+        var i, j, pre, list = exp.preload.dependencySource, useage;
+        
+        if(!exp.preload.preloadFinish){
+            return ;
+        }
+        exp.preload.preloadFinish = false;
+        
+        imageCount = 0;
+        audioCount = 0;
+        videoCount = 0;
+        imageCheck = 0;
+        audioCheck = 0;
+        videoCheck = 0;
+        
+        for(i = 0; i < list.length; i++){
+            pre = list[i];
+            if((/image|img/g).test(pre.type.toLowerCase())){
+                useage = exp.preload.preloadImages;
+                imageCount = pre.src.length;
+            }
+            else if((/aud|audio/g).test(pre.type.toLowerCase())){
+                useage = exp.preload.preloadAudio;  
+                audioCount = pre.src.length;
+            }
+            else if((/vid|video/g).test(pre.type.toLowerCase())){
+                useage = exp.preload.preloadVideo;   
+                videoCount = pre.src.length;
+            }
+            else {
+                continue;   
+            }
+            
+            for(j = 0; j < pre.src.length; j++){
+                useage(pre.src[j]);
+            }
+        }
+        judgePreloadStutas();
+    }
+    
+    
+    //默认情况下为false内容，当为true的请款下表示加载完成可以再次加载，而false表示加载未完成，不可在加载。
+    pre.preloadFinish = true;
+    
+/********************************************************
+**summary:判断当前的内容预加载是否已经完成了。
+********************************************************/ 
+    var judgePreloadStutas = function(){
+        var clear1, clear2, clear3, fclear, final1, final2, final3;
+        
+        clear1 = setInterval(function(){
+            if(imageCheck === imageCount){
+                final1 = true;   
+                clearInterval(clear1);
+            }
+        }, 400);
+        
+        clear2 = setInterval(function(){
+            if(audioCheck === audioCount){
+                final2 = true;   
+                clearInterval(clear2);
+            }
+        }, 400);
+        
+        clear3 = setInterval(function(){
+            if(videoCheck === videoCount){
+                final3 = true;   
+                clearInterval(clear3);
+            }
+        }, 400);
+        
+        fclear = setInterval(function(){
+            if(final1 && final2 && final3){
+                exp.preload.preloadFinish = true;   
+                clearInterval(fclear);
+            }
+        }, 400);
+        
     }
 
     e.preload = pre;
@@ -836,7 +947,9 @@ var exp = (function(e){
 **return:空
 *********************************************************/
     var createScript = function(){
-           
+        var newScript = exp.dom.createElement('script', {
+            //编写相关的属性。
+        });
     }
    
 /********************************************************
@@ -849,7 +962,7 @@ var exp = (function(e){
 **return:空
 *********************************************************/
     build.loadFile = function(){
-           
+        //to do：head标签中添加相关的script标签进行JS加载。 
     }
     
 /********************************************************
@@ -864,7 +977,7 @@ var exp = (function(e){
 *********************************************************/
     build.dependencyFile = []; //依赖注入内容形式的文件数组内容。添加文件的路径，会议数组右前向后的进行一次的添加内容，
     build.loading = function(){
-           
+        //同时动态加载多个JS文件内容。
     }
 
 //放置controller中。
@@ -885,3 +998,149 @@ var exp = (function(e){
     return e;
     
 })(exp || window.exp || {});
+
+
+//以上部分可以进行内容复用。
+/***********************************************************************************************/
+
+
+//下面部分为关联性内容
+/*******************************************************
+**programmer:hzw.
+**
+**time:2017/03/07
+**
+**summary:index内容事件绑定，预设事件内容，页面初始化的内容的设置和使用。
+********************************************************/
+
+//展示屏幕比例数据
+var width = 640;
+var height = 1008;
+
+var currentPage = 0;
+
+var router = (function(r){
+/*******************************************************
+**summary：获取当前课程页面内容页面数量以及src地址。替换与添加页面中的iframe元素。
+**  替换loading页面中的内容。页面内容适配通过调用suitable函数。
+********************************************************/
+    r.init = function(){
+        //页面展示适配。读取loading页面内容。
+        var loadPage = document.getElementById("page0");
+        var doc = document.getElementById("page0").contentWindow;
+        
+        exp.dom.setElements(loadPage, 'src', './public/page0/index.html');
+        suitable();
+    }
+    
+/*******************************************************
+**summary：当前页面在加载页的时候部分功能。
+********************************************************/
+    r.loadingParent = function(count){
+        //后续页面内容加载进入，并对于其中的内容进行编写与运行。
+        var i, newEle, parent;
+        
+        if(document.getElementById('page1')){
+            return;   
+        }
+        
+        for(i = 1; i < count; i++){
+            newEle = exp.dom.createElement('iframe', {'src':'./public/page1/index.html',
+                                         'name':'page'+i,
+                                         'id':'page'+i,
+                                         'frameborder':0,
+                                         'sandbox':'allow-same-origin allow-forms allow-scripts',
+                                         'style':'display:none;'});
+            parent = document.getElementById('package');
+            exp.dom.insertElements(newEle, parent, exp.dom._CHILD);
+        }
+    }
+
+/********************************************************
+**summary:页面内容适配对象。微页面添加变形自动适配函数。设置主页。
+*********************************************************/
+    var suitable = function(){
+        
+        var height, width;
+        
+        if(exp.info.userAgent.toLowerCase() === 'mobile'){
+            exp.dom.setElements(document.getElementById('package'), 'style', 'width:100%;height:100%;');
+        }
+        else if(exp.info.userAgent.toLowerCase() === 'pc'){
+            height = document.body.offsetHeight;
+            width = height/1008*640;
+            exp.dom.setElements(document.getElementById('package'), 'style', 'width:'+width+'px;');
+        }
+    }
+    
+/********************************************************
+**summary:pc端页面横屏
+*********************************************************/
+    r.resuit = function(){
+        
+    }
+    
+    var removeChange = function(){
+           
+    }
+    
+/*********************************************************
+**summary:展示新页面进行展示操作。
+**********************************************************/
+    r.exchangePage = function(num, extra, time){
+        //子页面通过调用这一方法并传递数据从而可以达到翻页的效果。
+        //函数默认行为是向下翻页，当num传递为false的时候则为向上翻页。
+        //extra为相关翻页前的动画内容。time:为动画事件，如果内容不同时出现则判定为错误。
+        var i, count=true, pastPage = currentPage, cover;
+        var pages =document.getElementsByTagName('iframe');
+        
+        if(typeof num === 'number'|| typeof num === 'boolean'){
+            count = num;   
+            if(num === currentPage){
+                return;   
+            }
+        }
+        else {
+            console.error('TypeError:Type of parameter was wrong');
+            return;
+        }
+
+        
+        if(typeof num === 'number'){
+            currentPage = num;   
+        }
+        else if(num){
+            currentPage++;
+        }
+        else {
+            currentPage--;   
+        }
+        pastPage = document.getElementById('page'+pastPage);
+        
+        if(!extra){
+            exp.dom.setElements(pastPage, 'style', 'display:none;');
+            exp.dom.deleteStyle(document.getElementById('page'+currentPage), 'display');
+        }
+        else{
+            exp.dom.setElements(pastPage, 'style', ' '+extra);
+
+            //设置事件对当前的内容进行动画设置和延时隐藏展示操作。
+            setTimeout(function(){
+                cover = pastPage.getAttribute('style').replace((new RegExp(' '+extra)), '');
+                exp.dom.setElements(pastPage, 'style', cover); 
+                exp.dom.setElements(pastPage, 'style', 'display:none;', true);
+                exp.dom.deleteStyle(document.getElementById('page'+currentPage), 'display');
+            }, time);
+        }
+    } 
+    
+    return r;
+
+})(router || window.router || {});
+
+//主题页面内容进行事件的添加。
+exp.event.addEvents(window, 'load', function(){
+       
+    router.init();
+    
+},false);
