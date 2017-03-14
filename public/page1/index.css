@@ -1,0 +1,63 @@
+.pic0_1{
+    animation:bounceInLeft 1s 9s ease both;
+    -webkit-animation:bounceInLeft 1s 9s ease both;
+	-moz-animation:bounceInLeft 1s 9s ease both;   
+}
+
+.pic0_2{
+    animation:fadeInUp 1s 9.5s ease both;
+    -webkit-animation:fadeInUp 1s 9.5s ease both;
+	-moz-animation:fadeInUp 1s 9.5s ease both;   
+}
+
+.pic0_3{
+    animation:fadeInDown 1s 14s ease both;
+    -webkit-animation:fadeInDown 1s 14s ease both;
+	-moz-animation:fadeInDown 1s 14s ease both;   
+}
+
+.pic0_4{
+    animation:fadeInUp 1.5s 0.5s ease both;
+    -webkit-animation:fadeInUp 1.5s 0.5s ease both;
+	-moz-animation:fadeInUp 1.5s 0.5s ease both;   
+}
+
+.pic0_5{
+    animation:fadeIn .5s 0s ease both;
+    -webkit-animation:fadeIn .5s 0s ease both;
+	-moz-animation:fadeIn .5s 0s ease both;   
+}
+
+.pic0_6{
+    /*animation:fadeOutDown 1s 0s infinite linear both;
+    -webkit-animation:fadeOutDown 1s 0s infinite linear both;
+	-moz-animation:fadeOutDown 1s 0s infinite linear both; */
+}
+
+.pic0_71{
+    animation:fadeIn 1s 1s ease both;
+    -webkit-animation:fadeIn 1s 1s ease both;
+	-moz-animation:fadeIn 1s 1s ease both;   
+}
+.pic0_72{
+    animation:fadeIn 1s 4s ease both;
+    -webkit-animation:fadeIn 1s 4s ease both;
+	-moz-animation:fadeIn 1s 4s ease both;   
+}
+.pic0_7{
+    animation:fadeIn 1s 7s ease both;
+    -webkit-animation:fadeIn 1s 7s ease both;
+	-moz-animation:fadeIn 1s 7s ease both;   
+}
+
+.pic0_9{
+    animation:bounceInRight 1s 13s ease both;
+    -webkit-animation:bounceInRight 1s 13s ease both;
+	-moz-animation:bounceInRight 1s 13s ease both;   
+}
+
+.pic0_10{
+    animation:bounceInLeft 1s 17s ease both;
+    -webkit-animation:bounceInLeft 1s 17s ease both;
+	-moz-animation:bounceInLeft 1s 17s ease both;   
+}
