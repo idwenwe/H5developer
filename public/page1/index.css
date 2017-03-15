@@ -1,3 +1,21 @@
+body{
+    background-color: #ededef;   
+}
+
+.pic0_1{position: absolute;bottom: 0%;z-index: 4;}
+.pic0_2{position: absolute;bottom: 0%;z-index: 3;}
+.pic0_3{position: absolute;bottom: 0%;z-index: 2;}
+.pic0_4{position: absolute;top: 0%;z-index: 3;}
+.pic0_5{position: absolute;top: 0%;z-index: 1;}
+.pic0_6{position: absolute;bottom: 0%;z-index: 10;}
+.pic0_71{position: absolute;top: 0%;z-index: 4;}
+.pic0_72{position: absolute;top: 0%;z-index: 4;}
+.pic0_7{position: absolute;top: 0%;z-index: 4;}
+.pic0_8{position: absolute;bottom: 0%;z-index: 5;}
+.pic0_9{position: absolute;top: 0%;z-index: 4;}
+.pic0_10{position: absolute;top: 0%;z-index: 4;}
+
+
 .pic0_1{
     animation:bounceInLeft 1s 9s ease both;
     -webkit-animation:bounceInLeft 1s 9s ease both;
@@ -29,9 +47,9 @@
 }
 
 .pic0_6{
-    /*animation:fadeOutDown 1s 0s infinite linear both;
+    animation:fadeOutDown 1s 0s infinite linear both;
     -webkit-animation:fadeOutDown 1s 0s infinite linear both;
-	-moz-animation:fadeOutDown 1s 0s infinite linear both; */
+	-moz-animation:fadeOutDown 1s 0s infinite linear both; 
 }
 
 .pic0_71{

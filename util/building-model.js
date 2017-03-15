@@ -177,11 +177,6 @@ var exp = (function(e){
         
         var attrName, attrDate, ex = false, i, eles = [];
         
-        if(!(ele instanceof Element) && !(ele instanceof Array)){
-            console.error("TypeError: Type of arguments was wrong");
-            return ;
-        } 
-        
         if(!extra){
             console.error('syntaxError: Wrong parmeter of function');
             return;   
@@ -261,7 +256,7 @@ var exp = (function(e){
             
             content = '' + eles[i].getAttribute('style');
             if(check.test(content)){
-                content.replace(check, '');
+                content = content.replace(check, '');
                 eles[i].setAttribute('style', content);
             }
         }
@@ -622,7 +617,7 @@ var exp = (function(e){
     events.addEventsByObj = function(object){
         var type, info, eventType, callback, each, check;
         
-        if(!(object instanceof 'object')){
+        if(!(typeof object === 'object')){
             console.error("TypeError: Type of arguments was wrong");
             return ;
         }
@@ -633,6 +628,9 @@ var exp = (function(e){
                 type = check[0]; 
                 if(type !== 'ele'){
                     info = exp.dom.getElements(object[each], type, window.document);    
+                }
+                else {
+                    info = object[each];   
                 }
             }
             else {
@@ -698,24 +696,11 @@ var exp = (function(e){
     var validateImage = function(img){
         var check = arguments[1];
         
-        if(check){
-            imageCheck++;
-            return;
+        if((!check) || (!img.complete) || (typeof img.naturalWidth != "undefined" && img.naturalWidth == 0)){   
+            console.log('imageError: Do not finish preload of image');
         }
-        if(!img.complete){   
-            setTimeout(function(){
-                exp.preload.preloadImages(img.src, true);
-            }, 200);
-        }
-        else if(typeof img.naturalWidth != "undefined" && img.naturalWidth == 0){
-            setTimeout(function(){
-                exp.preload.preloadImages(img.src, true);
-            }, 200);  
-        }
-        else{
-            imageCheck++
-            return;
-        }
+        imageCheck++
+        return;
     };
 
 /********************************************************
@@ -731,17 +716,11 @@ var exp = (function(e){
 *********************************************************/  
     pre.preloadImages = function(src){
         
-        var check = arguments[1];
-        
         var img = new Image();
-        if(check){
-            img.onload = function(){validateImage(img, true)};
-            img.onerror = function(){validateImage(img, true)};
-        }
-        else {
-            img.onload = function(){validateImage(img)};
-            img.onerror = function(){validateImage(img)};
-        }
+        
+        img.onload = function(){validateImage(img)};
+        img.onerror = function(){validateImage(img, true)};
+        
         img.src = src;
     };
     
@@ -755,13 +734,10 @@ var exp = (function(e){
         var check = arguments[1];
         
         if(!check){
-            console.error('AudioError: Cannot loading this audio');
+            console.log('AudioError: Cannot loading this audio');
         }
-        else {
-            audioCheck++;
-            return;
-        }
-        
+        audioCheck++;
+        return;
     }
     
 /********************************************************
@@ -793,13 +769,10 @@ var exp = (function(e){
         var check = arguments[1];
         
         if(!check){
-            console.error('AudioError: Cannot loading this audio');
+            console.log('AudioError: Cannot loading this audio');
         }
-        else {
-            audioCheck++;
-            return;
-        }
-        
+        audioCheck++;
+        return;
     }
     
 /********************************************************
@@ -1000,6 +973,170 @@ var exp = (function(e){
 })(exp || window.exp || {});
 
 
+
+
+/**************************************plant平台相关联内容****************************************/
+//var FINISH = 1;
+//
+//var UNFINISH = 0;
+//
+////初始化数据设置。
+//var INIT = "0,0,0,0,0";
+//
+//var CONNECTION = 1;
+//
+//var UNCONNECTION = 0;
+//
+//
+//var ser = (function(s){
+//
+//    var Server = function(){
+//         return new Server.prototype.init();
+//    }
+//
+//    Server.prototype = {
+//
+//         init:function(){
+//
+//            //设置当前对象的特殊数据和方法。
+//            var me =this;
+//
+//            //当前对象中的私有变量声明。
+//            var plantData = "";
+//
+//            //用于存储当前是否连接到平台。0表示可以连接到平台，而1表示不能连接到平台。
+//            me.connection = CONNECTION;
+//
+//            //问题内容的设置,data数据是一个plantData对象。程序内部控制当前的data将不会出错。
+//            me.setData = function(data){
+//                plantData = data;
+//            }
+//
+//            //获取当前的问题内容。当当前的对象中没有问题数据的时候。我们返回的将会是undefined
+//            me.getData = function(){
+//                if(!plantData){
+//                    return null;
+//                }
+//                return plantData;
+//            }
+//
+//            //调用方法已达到初始化当前的对象中的数据的目的。
+//            me.connectTo();
+//
+//            var result;
+//            result = this.getValueOfStorage();//获取当前的存储字段的内容。如果是首次进入这实行初始化数据的处理。
+//            me.plantDataInit(result);//设置初始化的平台数据对象。
+//            return this;
+//        },
+//
+//
+//      //connectTo函数逻辑：
+//        //  1.调用doLMSGetValue函数获取当前的内容.
+//        //  2.如果当前的内容为空字符串则说明没有连接到当前的平台中，如果获取的内容是"null"则我们可以确定当前的页面连接到了平台。
+//        //  3.如果当前页面没有连接到平台则将当前对象的连接状态更改为UNCONNECT。
+//        //  4.如果当前的页面连接到了，则直接设置成为CONNECTED;
+//        connectTo: function(){
+//            var result;
+//
+//            result = doLMSGetValue(KEY);
+//
+//            if(!result){
+//                this.connection = UNCONNECTION;   
+//            }
+//            else {
+//                this.connection = CONNECTION;   
+//            }
+//        },
+//
+//        //getValueOfStorage获取存储的额内容。
+//        //  1.判断当前的连接状态。
+//        //  2.一句判断的数据来获取相应的值。
+//        //  3.判断获取的值，如果当前的值是空着使用定义好的初始值进行返回。
+//        //  4.如果当前的最终值为初始化值得时候，存储当前的额初始值。
+//        getValueOfStorage:function(){
+//            var result;
+//
+//            if(this.connection) { //当前的连接状态为已经连接到平台的情况。
+//                result = this.getValue(); // 获取当前的平台数据。
+//                if(result == "null"){
+//                    result = INIT;
+//                    this.setValue(INIT);
+//                }
+//            }
+//            else {
+//                result = sessionStorage.getItem(KEY);
+//                if(!result){
+//                    result = INIT;
+//                    this.setValue(INIT);
+//                }
+//            }
+//            return result;
+//        },
+//
+//        //plantDataInit为当前页面数据转换累的函数。传递的内容为str类型并按照相关的额格式。
+//        //  1.获取当前字符串并把当前的数据内容编传递到Plantdata对象的构造方法中进行数据对象的初始化。
+//        //  2.根据返回的内容对当前对象中的内容进行内容的相对应的设置。
+//        plantDataInit:function(str){
+//            var result;
+//
+//            result = PlantData(str);
+//            this.setData(result);
+//        },
+//
+//        //getValue用于获取平台数值
+//        //  1.使用doLMSGetValue函数来获取当前的值。
+//        //  2.设置当前的额已经结束，通过doFinish()函数来进行的。
+//        getValue:function(){
+//            var result;
+//
+//            result = doLMSGetValue(KEY);
+//            if(!result){
+//                result = sessionStorage.getItem(KEY);   
+//            }
+//            doLMSCommit();
+//            doLMSFinish();
+//            return result;
+//        },
+//
+//        //setValue设置平台数据。
+//        //设置当前平台内容的相关数据。
+//        setValue:function(value){
+//            var result = doLMSSetValue(KEY, value);
+//            if(!result){
+//                sessionStorage.setItem(KEY, value);   
+//            }
+//        },
+//
+//        //设置当前的课程是完成状态。
+//        finishCheck:function(station){
+//            var status = doLMSGetValue( "cmi.core.lesson_status" );
+//            if(status == "complete"){
+//                return;   
+//            }
+//            if(/incomplete/ig.test(station)){
+//                doContinue("incomplete");   
+//            }
+//            else if(/complete/ig.test(station)){
+//                doContinue("complete");   
+//            }
+//        },
+//         //判断当前课程是否已经结束
+//        complete:function(){
+//            if(this.getData().complete()){
+//                this.finishCheck("complete");
+//            }
+//            return ;
+//        }
+//    };
+//    
+//    Server.prototype.init.prototype = Server.prototype;
+//    
+//    s = new Server();
+//    
+//    return s;
+//
+//})(ser || window.ser || {});
+
 //以上部分可以进行内容复用。
 /***********************************************************************************************/
 
@@ -1045,7 +1182,7 @@ var router = (function(r){
         }
         
         for(i = 1; i < count; i++){
-            newEle = exp.dom.createElement('iframe', {'src':'./public/page1/index.html',
+            newEle = exp.dom.createElement('iframe', {'src':'./public/page'+i+'/index.html',
                                          'name':'page'+i,
                                          'id':'page'+i,
                                          'frameborder':0,
@@ -1053,7 +1190,18 @@ var router = (function(r){
                                          'style':'display:none;'});
             parent = document.getElementById('package');
             exp.dom.insertElements(newEle, parent, exp.dom._CHILD);
+            newEle.onload = newEle.onreadystatechange = function() 
+            {
+                 if (this.readyState && this.readyState != 'complete') return;
+                 else {
+                     onComplete(newEle);
+                 }
+            }
         }
+    }
+    
+    var onComplete = function(ele){
+        exp.dom.setElements(ele.contentWindow.document.body, "style", "display:none;");
     }
 
 /********************************************************
@@ -1120,6 +1268,7 @@ var router = (function(r){
         if(!extra){
             exp.dom.setElements(pastPage, 'style', 'display:none;');
             exp.dom.deleteStyle(document.getElementById('page'+currentPage), 'display');
+            pages[currentPage].contentWindow.concat.exhcangePageStartEvent();
         }
         else{
             exp.dom.setElements(pastPage, 'style', ' '+extra);
@@ -1130,6 +1279,7 @@ var router = (function(r){
                 exp.dom.setElements(pastPage, 'style', cover); 
                 exp.dom.setElements(pastPage, 'style', 'display:none;', true);
                 exp.dom.deleteStyle(document.getElementById('page'+currentPage), 'display');
+                pages[currentPage].contentWindow.concat.exhcangePageStartEvent();
             }, time);
         }
     } 

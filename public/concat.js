@@ -7,14 +7,14 @@
 
 ********************************************************/
 
-var doc = window.parent;
-
-var parent = doc.document.getElementById('page'+doc.currentPage);
-
 //预设定的相关事件内容。
 var concat = (function(c){
     
-    c.pageCount = 2;//页面内容总数。
+    c.pageCount = 3;//页面内容总数。
+    
+    var doc = window.parent;
+
+    var parent = doc.document.getElementById('page'+doc.currentPage);
     
     var slipping = false; //设置是否支持滑屏翻页内容。
     
@@ -147,8 +147,8 @@ var concat = (function(c){
 **点击跳页设置。
 ********************************************************/
     c.exchangePage = function(num, extra, time){
-        doc.router.exchangePage(num, extra, time);
         concat.audioStop();
+        doc.router.exchangePage(num, extra, time);
     }
     
 /*******************************************************
@@ -194,20 +194,37 @@ var concat = (function(c){
 **当前页面的音频播放。
 ********************************************************/
     var playing ;
-    c.audioPlay = function(){
-        playing = doc.exp.dom.getElements('audio', 'tag', document);
+    c.audioPlay = function(ele){
+        
+        var i ;
+        playing = [];
+        if(ele instanceof Element){
+            playing.push(ele)   
+        }
+        else{
+            playing = doc.exp.dom.getElements('audio', 'tag', document);
+        }
         if(playing.length === 0){
             return;   
         }
-        playing.currentTime = 0;
-        playing.play();
+        for(i =0 ;i < playing.length; i++){
+            //获取data-default属性。
+            if(playing[i].getAttribute('data-default')){
+                playing[i].currentTime = 0;
+                playing[i].play();   
+            }
+        }
     }
     
     c.audioStop = function(){
+        
+        var i ;
         if(!playing){
             return;
         }
-        playing.pause();  
+        for(i = 0 ; i< playing.length; i++){
+            playing[i].pause();   
+        }
         playing = null;
     }
     
@@ -215,11 +232,8 @@ var concat = (function(c){
 **当前页面的视频播放。
 ********************************************************/
     var playingVideo ;
-    c.videoPlay = function(){
-        playingVideo = doc.exp.dom.getElements('video', 'tag', document);
-        if(playingVideo.length === 0){
-            return;   
-        }
+    c.videoPlay = function(ele){
+        playingVideo = ele;
         playingVideo.currentTime = 0;
         playingVideo.play();
     }
@@ -230,6 +244,15 @@ var concat = (function(c){
         }
         playingVideo.pause();  
         playingVideo = null;  
+    }
+    
+/*******************************************************
+**页面转换
+********************************************************/
+    c.exhcangePageStartEvent = function(){
+        //当转换页面的时候子页面要做的事情。
+        concat.audioPlay();
+        doc.exp.dom.deleteStyle(document.body, 'display');
     }
     
 /*******************************************************
@@ -250,15 +273,14 @@ var concat = (function(c){
         if(doc.currentPage === 0){
             doc.router.loadingParent(concat.pageCount);   
         }
-        concat.audioPlay();
     }
     
     return c;
 })(concat || window.concat || {});
 
 //页面初始化内容函数
-doc.exp.event.addEvents(window, 'load', function(){
-    
+window.parent.exp.event.addEvents(window, 'load', function(){
+
     concat.init();
 
 },false);
