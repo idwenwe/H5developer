@@ -1,0 +1,48 @@
+body{
+    background-color: #ededef;   
+}
+
+.pic1_1{position: absolute;bottom: 0%;z-index: 3;}
+.pic1_2{position: absolute;top: 0%; z-index: 3;}
+.pic1_3{position: absolute;top: 0%;z-index: 3;}
+.pic1_4{position: absolute;top: 0%;z-index: 3;}
+.pic1_5{position: absolute;top: 0%;z-index: 2;}
+.pic1_6{position: absolute;top: 0%;z-index: 1;}
+.pic1_7{position: absolute;top: 0%;z-index: 4;}
+
+
+.pic1_1{
+    animation:fadeOutDown 1s 0s infinite linear both;
+    -webkit-animation:fadeOutDown 1s 0s infinite linear both;
+	-moz-animation:fadeOutDown 1s 0s infinite linear both;   
+}
+
+.pic1_2{
+    animation:fadeIn 1s 2.5s ease both;
+    -webkit-animation:fadeIn 1s 2.5s ease both;
+	-moz-animation:fadeIn 1s 2.5s ease both;   
+}
+
+.pic1_3{
+    animation:bounceInLeft 0.5s 2s ease both;
+    -webkit-animation:bounceInLeft 0.5s 2s ease both;
+	-moz-animation:bounceInLeft 0.5s 2s ease both;   
+}
+
+.pic1_4{
+    animation:fadeInRight 0.8s 1.2s ease both;
+    -webkit-animation:fadeInRight 0.8s 1.2s ease both;
+	-moz-animation:fadeInRight 0.8s 1.2s ease both;  
+}
+
+.pic1_5{
+    animation:fadeInLeft 0.8s 0.5s ease both;
+    -webkit-animation:fadeInLeft 0.8s 0.5s ease both;
+	-moz-animation:fadeInLeft 0.8s 0.5s ease both; 
+}
+
+/*.pic1_6{
+    animation:fadeIn 1s 0.5s ease both;
+    -webkit-animation:fadeIn 1s 0.5s ease both;
+	-moz-animation:fadeIn 1s 0.5s ease both   
+}*/
