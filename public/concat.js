@@ -10,13 +10,13 @@
 //预设定的相关事件内容。
 var concat = (function(c){
     
-    c.pageCount = 3;//页面内容总数。
+    c.pageCount = 15;//页面内容总数。
     
     var doc = window.parent;
 
     var parent = doc.document.getElementById('page'+doc.currentPage);
     
-    var slipping = false; //设置是否支持滑屏翻页内容。
+    var slipping = true; //设置是否支持滑屏翻页内容。
     
     var accross = false; //默认为false表示竖屏，改为true则默认为横屏，如果直销要单页面横屏的话请调用pageAccess()函数。
     
@@ -33,8 +33,6 @@ var concat = (function(c){
         var event = e||window.Event;
         var x = event.pageX || event.clientX;
         var y = event.pageY || event.clientY;
-        point.x = x;
-        point.y = y;
         return {'x':x, 'y':y};
     }
     
@@ -43,16 +41,15 @@ var concat = (function(c){
         var event = e.touches[0];
         var x = Number(event.pageX || event.clientX);
         var y = Number(event.pageY || event.clientY);
-        point.x = x;
-        point.y = y;
         return {'x':x, 'y':y};
     }   
 
     c.slippingEvent = {
         'ele': document.body,
         
-        'mousestart':function(e){
+        'mousedown':function(e){
             
+            parent = doc.document.getElementById('page'+doc.currentPage);
             var client = doc.exp.info.userAgent;
             
             if(moved){
@@ -65,19 +62,22 @@ var concat = (function(c){
             moved= true;
             
             if(client.toLowerCase() === 'mobile'){
-                concat.getMobilePoint(e);
+                point = concat.getMobilePoint(e);
             }
             else {
-                concat.getPoint(e);   
+                point = concat.getPoint(e);   
             }
             
         },
         
         'mousemove':function(e){
             
-            var newPo, moved;
+            var newPo, move;
             var client = doc.exp.info.userAgent;
             e.preventDefault(); 
+            if(!moved){
+                return;   
+            }
             //to do:移动动画效果设置。对是否移动作出判断。
             if(client.toLowerCase() === 'mobile'){
                 newPo = concat.getMobilePoint(e);
@@ -88,28 +88,38 @@ var concat = (function(c){
             
             distance = newPo.y - point.y;
             
-            moved = 'transfrom:translateY('+distance+'px;);transition:all 0.5s ease-out 0s;';
             
-            doc.exp.dom.setElements(parent, 'style', moved, true);
+            move = 'transform:translateY('+distance+'px);';
+            doc.exp.dom.deleteStyle(parent, 'transform');
+            
+            doc.exp.dom.setElements(parent, 'style', move, true);
         },
         
         'mouseup':function(e){
             
-            var moved;
+            var move;
             var height =document.body.offsetHeight;
             
             e.preventDefault();  
             //to do:调用exchangepage页面然后将当前的内容讲moved设置成为0.
+            moved = false;
             
             if(Math.abs(distance) >= 60){
                 if(distance < 0){
-                    moved = 'transform:translateY('+(-height)+'px);transition:all 0.5s ease-out 0s;';
-                    concat.exchangePage(true, moved, 1000);
+                    move = 'transform:translateY('+(-height)+'px);';
+                    if(!concat.exchangePage(true, move, 500)){
+                        doc.exp.dom.deleteStyle(parent, 'transform');    
+                    }
                 }
                 else {
-                    moved = 'transform:translateY('+height+'px);transition:all 0.5s ease-out 0s;';
-                    concat.exchangePage(false, moved, 1000);
+                    move = 'transform:translateY('+height+'px);';
+                    if(!concat.exchangePage(false, move, 500)){
+                        doc.exp.dom.deleteStyle(parent, 'transform');    
+                    }
                 }
+            }
+            else {
+                doc.exp.dom.deleteStyle(parent, 'transform');
             }
         },
     }//编写相关的划屏点击事件内容进行设置。
@@ -148,7 +158,7 @@ var concat = (function(c){
 ********************************************************/
     c.exchangePage = function(num, extra, time){
         concat.audioStop();
-        doc.router.exchangePage(num, extra, time);
+        return doc.router.exchangePage(num, extra, time);
     }
     
 /*******************************************************
@@ -178,16 +188,20 @@ var concat = (function(c){
 ********************************************************/
     c.exchangeLoadingPage = function(){
         
+        var pre = doc.exp.preload;
         if(doc.currentPage != 0){
             return;   
         }
         
-        var clear = setInterval(function(){
-            if(doc.exp.preload.preloadFinish){
-                clearInterval(clear);
-                concat.exchangePage(true);   
+//        var clear = setInterval(function(){
+//            if(pre.imageCheck === pre.imageCount && pre.audioCheck === pre.audioCount && pre.videoCheck === pre.videoCount){
+//                pre.preloadFinish = true;
+//                clearInterval(clear);
+        setTimeout(function(){
+            if(!concat.exchangePage(true, true)){
+                console.log('Error: At least one-another  without loaging page'); 
             }
-        },500);   
+        },2000);   
     }
     
 /*******************************************************
@@ -264,10 +278,11 @@ var concat = (function(c){
         if(!accross){
             //直接引入page.css就好了。
         }
-        else if(accross){
+        else{
             concat.pageAccross();
         }
         if(slipping){
+            concat.slippingEvent.ele = document.body;
             doc.exp.event.addEventsByObj(concat.slippingEvent);
         }
         if(doc.currentPage === 0){
