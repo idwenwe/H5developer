@@ -1,4 +1,4 @@
-var button = document.getElementById()
+var button = document.getElementById('image');
 
 concat.dependencyEvent = [
 
@@ -10,3 +10,5 @@ concat.dependencyEvent = [
     }
 
 ]
+
+concat.initalize();

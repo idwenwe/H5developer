@@ -10,17 +10,19 @@
 //预设定的相关事件内容。
 var concat = (function(c){
     
-    c.pageCount = 15;//页面内容总数。
+    c.pageCount = 4;//页面内容总数。
     
     var doc = window.parent;
-
-    var parent = doc.document.getElementById('page'+doc.currentPage);
     
-    var slipping = true; //设置是否支持滑屏翻页内容。
+    var slipping = false; //设置是否支持滑屏翻页内容。
     
     var accross = false; //默认为false表示竖屏，改为true则默认为横屏，如果直销要单页面横屏的话请调用pageAccess()函数。
-    
+	
     /*************************************************************/
+    c.currentPage = 0;
+	
+	c.complete = 0;
+    
     //既定内容无需修改。
     var point = {'x':0, 'y':0};
     
@@ -48,9 +50,8 @@ var concat = (function(c){
         'ele': document.body,
         
         'mousedown':function(e){
-            
-            parent = doc.document.getElementById('page'+doc.currentPage);
-            var client = doc.exp.info.userAgent;
+        
+            var client = exp.info.userAgent;
             
             if(moved){
                 return;   
@@ -73,7 +74,7 @@ var concat = (function(c){
         'mousemove':function(e){
             
             var newPo, move;
-            var client = doc.exp.info.userAgent;
+            var client = exp.info.userAgent;
             e.preventDefault(); 
             if(!moved){
                 return;   
@@ -90,9 +91,8 @@ var concat = (function(c){
             
             
             move = 'transform:translateY('+distance+'px);';
-            doc.exp.dom.deleteStyle(parent, 'transform');
-            
-            doc.exp.dom.setElements(parent, 'style', move, true);
+            window.parent.postMessage('deleteStyle:transform', '*');
+            window.parent.postMessage('addStyle:'+move, '*');
         },
         
         'mouseup':function(e){
@@ -107,20 +107,14 @@ var concat = (function(c){
             if(Math.abs(distance) >= 60){
                 if(distance < 0){
                     move = 'transform:translateY('+(-height)+'px);';
-                    if(!concat.exchangePage(true, move, 500)){
-                        doc.exp.dom.deleteStyle(parent, 'transform');    
-                    }
+                    concat.exchangePage(true, move, 500);
                 }
                 else {
                     move = 'transform:translateY('+height+'px);';
-                    if(!concat.exchangePage(false, move, 500)){
-                        doc.exp.dom.deleteStyle(parent, 'transform');    
-                    }
+                    concat.exchangePage(false, move, 500); 
                 }
             }
-            else {
-                doc.exp.dom.deleteStyle(parent, 'transform');
-            }
+            window.parent.postMessage('deleteStyle:transform', '*');
         },
     }//编写相关的划屏点击事件内容进行设置。
     
@@ -135,8 +129,9 @@ var concat = (function(c){
         if(concat.dependencyEvent.length === 0){
             return;   
         }
-        doc.exp.event.dependencyEvent = concat.dependencyEvent;
-        doc.exp.event.injection();
+        exp.event.dependencyEvent = concat.dependencyEvent;
+        exp.event.injection();
+        exp.event.dependencyEvent = [];
     }
     
 /*******************************************************
@@ -149,16 +144,29 @@ var concat = (function(c){
         if(concat.dependencyPreload.length === 0){
             return;   
         }
-        doc.exp.preload.dependencySource = concat.dependencyPreload;
-        doc.exp.preload.preload();
+        exp.preload.dependencySource = concat.dependencyPreload;
+        exp.preload.preload();
+        exp.preload.dependencySource = [];
+    }
+    
+    c.dependencyBuild = [];
+    var build = function(){
+        if(concat.dependencyBuild.length === 0){
+            return;   
+        }
+        exp.build.dependencyFile = concat.dependencyBuild;
+		concat.dependencyBuild = [];
+        exp.build.loading(document);
+        exp.build.dependencyFile = [];
     }
     
 /*******************************************************
 **点击跳页设置。
 ********************************************************/
+    
     c.exchangePage = function(num, extra, time){
-        concat.audioStop();
-        return doc.router.exchangePage(num, extra, time);
+        var tr;
+        window.parent.postMessage('exchangePage:'+num + ',' + extra + ',' + time, '*');
     }
     
 /*******************************************************
@@ -166,11 +174,11 @@ var concat = (function(c){
 ********************************************************/
     c.pageAccross = function(){
         //当前页面内容横屏。
-        if(doc.exp.info.Brower.toLowerCase() === 'mobile'){
-            doc.exp.dom.setElements(document.body, 'class', 'cross', true);
+        if(exp.info.Brower.toLowerCase() === 'mobile'){
+            exp.dom.setElements(document.body, 'class', 'cross', true);
         }
         else {
-            doc.router.resuit();
+            
         }
     }
     
@@ -178,8 +186,10 @@ var concat = (function(c){
 **加载页面预加载内容以及初始化完成。
 ********************************************************/
     c.initalize = function(){
+        
         preload();
         injection();
+        build();
     }
     //doc.exp.preload.preloadFinish位页面与加载内容完成选项。
     
@@ -188,20 +198,24 @@ var concat = (function(c){
 ********************************************************/
     c.exchangeLoadingPage = function(){
         
-        var pre = doc.exp.preload;
-        if(doc.currentPage != 0){
+        var pre = exp.preload;
+        if(concat.currentPage != 0){
             return;   
         }
         
-//        var clear = setInterval(function(){
-//            if(pre.imageCheck === pre.imageCount && pre.audioCheck === pre.audioCount && pre.videoCheck === pre.videoCount){
+        var clear = setInterval(function(){
+            if(pre.imageCheck === pre.imageCount && pre.audioCheck === pre.audioCount && pre.videoCheck === pre.videoCount && concat.complete === (concat.pageCount - 1)){
+                clearInterval(clear);
+                concat.exchangePage(true, true);
+            }
+        },500);   
+//        var clear = setTimeout(function(){
 //                pre.preloadFinish = true;
 //                clearInterval(clear);
-        setTimeout(function(){
-            if(!concat.exchangePage(true, true)){
-                console.log('Error: At least one-another  without loaging page'); 
-            }
-        },2000);   
+//                if(!concat.exchangePage(true, true)){
+//                    console.log('Error: At least one-another  without loaging page'); 
+//                }
+//        },5000);
     }
     
 /*******************************************************
@@ -216,7 +230,7 @@ var concat = (function(c){
             playing.push(ele)   
         }
         else{
-            playing = doc.exp.dom.getElements('audio', 'tag', document);
+            playing = exp.dom.getElements('audio', 'tag', document);
         }
         if(playing.length === 0){
             return;   
@@ -263,10 +277,14 @@ var concat = (function(c){
 /*******************************************************
 **页面转换
 ********************************************************/
-    c.exhcangePageStartEvent = function(){
+    c.exchangePageStartEvent = function(){
         //当转换页面的时候子页面要做的事情。
+        concat.dependencyBuild.push('index.js');
+        exp.build.dependencyFile = concat.dependencyBuild;
+		exp.build.loading(document);
+		concat.dependencyBuild = [];
         concat.audioPlay();
-        doc.exp.dom.deleteStyle(document.body, 'display');
+        exp.dom.deleteStyle(document.body, 'display');
     }
     
 /*******************************************************
@@ -274,7 +292,6 @@ var concat = (function(c){
 ********************************************************/
     c.init = function(){
         //当前页面内容大小适配。
-        var parent = doc.document;
         if(!accross){
             //直接引入page.css就好了。
         }
@@ -283,10 +300,10 @@ var concat = (function(c){
         }
         if(slipping){
             concat.slippingEvent.ele = document.body;
-            doc.exp.event.addEventsByObj(concat.slippingEvent);
+            exp.event.addEventsByObj(concat.slippingEvent);
         }
-        if(doc.currentPage === 0){
-            doc.router.loadingParent(concat.pageCount);   
+        if(concat.currentPage === 0){
+            window.parent.postMessage('loadingPage:'+concat.pageCount, '*');
         }
     }
     
@@ -294,8 +311,29 @@ var concat = (function(c){
 })(concat || window.concat || {});
 
 //页面初始化内容函数
-window.parent.exp.event.addEvents(window, 'load', function(){
+window.addEventListener('load', function(){
 
     concat.init();
+    window.addEventListener('message', function(e){
+        var page;
+        var data = e.data.split(":");
+        if(data[0] === 'changed'){ 
+            concat.exchangePageStartEvent(); 
+        }
+        else if(data[0] === 'currentPage'){
+            page = parseInt(data[1]);
+			concat.currentPage = page;
+        }
+        else if(data[0] === 'addStyle'){
+            exp.dom.setElements(document.body, 'style', 'display:none;');   
+        }
+        else if(data[0] === 'pastPage'){
+			concat.audioStop();   
+            exp.dom.setElements(document.body, 'style', 'display:none;');    
+		}
+		else if(data[0] === 'complete'){
+			concat.complete ++;
+		}
+    },false);
 
 },false);

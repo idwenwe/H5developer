@@ -1,3 +1,11 @@
+/*******************************************************
+**programmer:hzw.
+**
+**time:2017/03/07
+**
+**summary:当前文件用于DOM操作功能，方便相关操作。
+********************************************************/
+
 var exp = (function(e){
 
 /*************************************************************************obj1:baseInfo
@@ -214,7 +222,10 @@ var exp = (function(e){
             eles.push(ele);
         }
         for(i = 0; i < eles.length; i++){
-            if(ex){
+            if(!(eles[i].getAttribute(attrName)) || eles[i].getAttribute(attrName).toLowerCase() === 'null' ){
+                eles[i].setAttribute(attrName, attrDate);
+            }
+            else if(ex){
                 if(attrName === 'style' || attrName === 'class'){
                     eles[i].setAttribute(attrName, eles[i].getAttribute(attrName) + '' +attrDate);   
                 }
@@ -822,7 +833,7 @@ var exp = (function(e){
     
     
     pre.preload = function(){
-        var i, j, pre, list = exp.preload.dependencySource, useage;
+        var i, j, prelist, list = exp.preload.dependencySource, useage;
         
         if(!exp.preload.preloadFinish){
             return ;
@@ -837,25 +848,25 @@ var exp = (function(e){
         exp.preload.videoCheck = 0;
         
         for(i = 0; i < list.length; i++){
-            pre = list[i];
-            if((/image|img/g).test(pre.type.toLowerCase())){
+            prelist = list[i];
+            if((/image|img/g).test(prelist.type.toLowerCase())){
                 useage = exp.preload.preloadImages;
-                exp.preload.imageCount = pre.src.length;
+                exp.preload.imageCount = prelist.src.length;
             }
-            else if((/aud|audio/g).test(pre.type.toLowerCase())){
+            else if((/aud|audio/g).test(prelist.type.toLowerCase())){
                 useage = exp.preload.preloadAudio;  
-                exp.preload.audioCount = pre.src.length;
+                exp.preload.audioCount = prelist.src.length;
             }
-            else if((/vid|video/g).test(pre.type.toLowerCase())){
+            else if((/vid|video/g).test(prelist.type.toLowerCase())){
                 useage = exp.preload.preloadVideo;   
-                exp.preload.videoCount = pre.src.length;
+                exp.preload.videoCount = prelist.src.length;
             }
             else {
                 continue;   
             }
             
-            for(j = 0; j < pre.src.length; j++){
-                useage(pre.src[j]);
+            for(j = 0; j < prelist.src.length; j++){
+                useage(prelist.src[j]);
             }
         }
     }
@@ -895,10 +906,12 @@ var exp = (function(e){
 **
 **return:空
 *********************************************************/
-    var createScript = function(){
+    var createScript = function(src){
         var newScript = exp.dom.createElement('script', {
             //编写相关的属性。
+            'src':src
         });
+        return newScript;
     }
    
 /********************************************************
@@ -910,8 +923,14 @@ var exp = (function(e){
 **
 **return:空
 *********************************************************/
-    build.loadFile = function(){
+    build.loadFile = function(src, docthing){
         //to do：head标签中添加相关的script标签进行JS加载。 
+        var newScript = createScript(src);
+        if(newScript){
+            newScript.setAttribute('class', 'script-added');
+            exp.dom.insertElements(newScript, docthing.getElementsByTagName('head')[0], exp.dom._CHILD);
+        }
+        return newScript;
     }
     
 /********************************************************
@@ -925,8 +944,17 @@ var exp = (function(e){
 **return:空
 *********************************************************/
     build.dependencyFile = []; //依赖注入内容形式的文件数组内容。添加文件的路径，会议数组右前向后的进行一次的添加内容，
-    build.loading = function(){
+    build.loading = function(docthing){
         //同时动态加载多个JS文件内容。
+        var i, eles = [];
+		if(exp.build.dependencyFile.length === 0){
+			return ;	
+		}
+        for(i = 0 ; i< exp.build.dependencyFile.length; i++){
+            eles.push(exp.build.loadFile(exp.build.dependencyFile[i], docthing)); 
+        }
+		exp.build.dependencyFile = [];
+        return eles;
     }
 
 //放置controller中。
@@ -947,138 +975,3 @@ var exp = (function(e){
     return e;
     
 })(exp || window.exp || {});
-
-
-
-/**************************************************************************************************/
-//页面内容测试专用。
-
-
-
-var concat = (function(c){
-    
-    var widthDef = 640;
-
-    var heightDef = 1008;
-
-    //页面适配内容。
-    var suitable = function(){
-        
-        var height, width, bh, bw, check;
-        
-        if(exp.info.userAgent.toLowerCase() === 'mobile'){
-            height = window.screen.availHeight;
-            width = window.screen.availWidth;
-            bh = document.body.offsetHeight;
-            check = document.body.offsetWidth;
-            bw = bh/heightDef*widthDef;
-            if(check < bw){
-                bw = check;   
-            }
-            bh = bh/height;
-            bw = bw/width;
-            exp.dom.setElements(document.body, 'style', 'width:'+width+'px;height:'+height+'px;transform:scaleX('+bw+') scaleY('+bh+');transform-origin:0 0;overflow:visible;position:absolute;top:0;left:0;margin:0;');
-        }
-        else if(exp.info.userAgent.toLowerCase() === 'pc' || exp.info.userAgent.toLowerCase() === 'ipad'){
-            height = document.body.offsetHeight;
-            width = height/heightDef*widthDef;
-            exp.dom.setElements(document.body, 'style', 'width:'+width+'px;height:'+height+'px;');
-        }
-    }
-    
-    /*******************************************************
-**当前页面的音频播放。
-********************************************************/
-    var playing ;
-    c.audioPlay = function(ele){
-        
-        var i ;
-        playing = [];
-        if(ele instanceof Element){
-            playing.push(ele)   
-        }
-        else{
-            playing = exp.dom.getElements('audio', 'tag', document);
-        }
-        if(playing.length === 0){
-            return;   
-        }
-        for(i =0 ;i < playing.length; i++){
-            //获取data-default属性。
-            if(playing[i].getAttribute('data-default')){
-                playing[i].currentTime = 0;
-                playing[i].play();   
-            }
-        }
-    }
-    
-    c.audioStop = function(){
-        
-        var i ;
-        if(!playing){
-            return;
-        }
-        for(i = 0 ; i< playing.length; i++){
-            playing[i].pause();   
-        }
-        playing = null;
-    }
-    
-/*******************************************************
-**当前页面的视频播放。
-********************************************************/
-    var playingVideo ;
-    c.videoPlay = function(ele){
-        playingVideo = ele;
-        playingVideo.currentTime = 0;
-        playingVideo.play();
-    }
-    
-    c.videoStop = function(){
-        if(!playingVideo){
-            return;
-        }
-        playingVideo.pause();  
-        playingVideo = null;  
-    }
-    
-    
-    c.dependencyPreload = [];
-    
-    c.dependencyEvent = [];
-    
-    var injection = function(){
-        if(concat.dependencyEvent.length === 0){
-            return;   
-        }
-        exp.event.dependencyEvent = c.dependencyEvent;
-        exp.event.injection();
-    }
-    
-    var preload = function(){
-         if(concat.dependencyPreload.length === 0){
-            return;   
-        }
-        exp.event.prdependencyPreload = c.dependencyPreload;
-        exp.preload.preload();  
-    }
-    
-    c.initalize = function(){
-        injection();
-        preload();
-    };
-    
-    c.init = function(){
-        suitable();   
-        concat.audioPlay();
-    }
-    
-    return c;
-
-})(concat || window.concat || {});
-
-exp.event.addEvents(window, 'load', function(){
-
-    concat.init();
-
-},false);
